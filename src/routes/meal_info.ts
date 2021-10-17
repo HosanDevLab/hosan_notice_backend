@@ -6,7 +6,6 @@ const router = Router({ mergeParams: true });
 router.get('/', (req, res) => {
   let now = new Date();
   now.setHours(now.getHours() + 9);
-  console.log('ds');
   axios
     .get(
       'https://open.neis.go.kr/hub/mealServiceDietInfo?' +
@@ -17,7 +16,6 @@ router.get('/', (req, res) => {
         `MLSV_FROM_YMD=${now.toISOString().slice(0, 10).replace(/-/g, '')}`
     )
     .then((r) => {
-      console.log(JSON.stringify(r.data));
       res.send(r.data);
     });
 });
