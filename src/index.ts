@@ -8,7 +8,7 @@ import routes from './routes';
 
 const PORT = process.env.PORT || 3001;
 
-dotenv.config({ path: 'src/.env' });
+dotenv.config();
 
 admin.initializeApp({
   credential: admin.credential.cert(
