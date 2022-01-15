@@ -8,7 +8,13 @@ import routes from './routes';
 
 const PORT = process.env.PORT || 3001;
 
-dotenv.config();
+if (process.env.NODE_ENV === 'production') {
+  dotenv.config();
+  console.log('PRODUCTION');
+} else {
+  dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
+  console.log('DEVELOPMENT');
+}
 
 admin.initializeApp({
   credential: admin.credential.cert(

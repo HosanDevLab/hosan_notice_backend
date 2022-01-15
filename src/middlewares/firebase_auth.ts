@@ -9,8 +9,9 @@ router.use((req, res, next) => {
   admin
     .auth()
     .verifyIdToken(idToken)
-    .then((decodedToken) => {
+    .then(async (decodedToken) => {
       const { uid, email } = decodedToken;
+
       req.user = { uid, email: email! };
       next();
     })
