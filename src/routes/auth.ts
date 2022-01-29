@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { StudentModel } from '../models/student';
 import admin from 'firebase-admin';
+import jwt from 'jsonwebtoken';
 
 const router = Router({ mergeParams: true });
 
@@ -22,9 +23,9 @@ router.get('/token', (req, res) => {
           .json({ message: 'Only hosan.hs.kr email can be used for login' });
       }
 
-      const student = await StudentModel.findById(uid).exec();
+      let student = await StudentModel.findOne({ uid: req.user.uid }).exec();
 
-      if (student && student.loginDevice !== deviceId) {
+      if (student && student.loginDevice && student.loginDevice !== deviceId) {
         res.status(401).json({
           code: 40100,
           message: 'Already logged in from another device',
@@ -32,9 +33,17 @@ router.get('/token', (req, res) => {
         return;
       }
 
-      res.json({
-        token: await admin.auth().createCustomToken(uid),
+      let token = jwt.sign({ uid: uid, deviceId }, process.env.SECRET_KEY!, {
+        expiresIn: '1 day',
       });
+
+      await student?.updateOne({
+        $set: {
+          loginDevice: deviceId,
+        },
+      });
+
+      res.json({ message: 'OK', token });
     })
     .catch((error) => {
       console.error(error);
@@ -42,9 +51,8 @@ router.get('/token', (req, res) => {
     });
 });
 
-router.post('/logout-another', (req, res) => {
+router.post('/logout-other', (req, res) => {
   const idToken = req.header('ID-Token');
-  const deviceId = req.header('Device-ID');
   if (!idToken) return res.status(401).json({ message: 'Unauthorized' });
   admin
     .auth()
@@ -54,11 +62,14 @@ router.post('/logout-another', (req, res) => {
 
       req.user = { uid, email: email! };
 
-      StudentModel.findByIdAndUpdate(uid, {
-        $set: {
-          loginDevice: deviceId,
-        },
-      })
+      StudentModel.findOneAndUpdate(
+        { uid },
+        {
+          $set: {
+            loginDevice: null,
+          },
+        }
+      )
         .exec()
         .then(() => res.json({ message: 'OK' }));
     })

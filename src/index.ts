@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import admin from 'firebase-admin';
 import routes from './routes';
+import mongoose from 'mongoose';
 
 const PORT = process.env.PORT || 3001;
 
@@ -31,6 +32,16 @@ app.use(cors());
 app.set('trust proxy', 1);
 
 app.use('/', routes);
+
+console.log(process.env.DB_USERNAME);
+
+mongoose
+  .connect(
+    `mongodb://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@${process.env.DB_HOSTNAME}:${process.env.DB_PORT}/admin`,
+    { dbName: process.env.DB_NAME }
+  )
+  .then(() => console.log('DB connected successfully'))
+  .catch(console.error);
 
 app.listen(PORT, () => {
   console.log(

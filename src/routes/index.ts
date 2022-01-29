@@ -8,7 +8,7 @@ import auth from './auth';
 const router = Router({ mergeParams: true });
 
 router.use('/toilet_paper', toiletPaper);
-router.use('/students', students);
+router.use('/students', firebaseAuth, students);
 router.use('/auth', auth);
 router.use('/meal-info', firebaseAuth, mealInfo);
 

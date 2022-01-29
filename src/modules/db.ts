@@ -9,10 +9,6 @@ if (process.env.NODE_ENV === 'production') {
   console.log('DEVELOPMENT');
 }
 
-mongoose.connect(
-  `mongodb://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@${process.env.DB_HOSTNAME}:${process.env.DB_PORT}/admin`
-);
-
 const db = mongoose.connection;
 
 db.once('connection', () => {
