@@ -7,7 +7,8 @@ interface Student {
   numberInClass: number;
   name: string;
   subjects: string[];
-  loginDevice: string;
+  loginDevice?: string;
+  refreshToken?: string;
 }
 
 export const StudentSchema = new Schema<Student>(
@@ -37,6 +38,9 @@ export const StudentSchema = new Schema<Student>(
       required: true,
     },
     loginDevice: {
+      type: String,
+    },
+    refreshToken: {
       type: String,
     },
   },

@@ -37,9 +37,13 @@ router.use((req, res, next) => {
 
       jwt.verify(authValue, process.env.SECRET_KEY!, async (err, decoded) => {
         if (err || !decoded) {
-          return res
-            .status(403)
-            .json({ message: '토큰을 검사하는 중에 오류가 발생했습니다.' });
+          console.log(err?.name, authValue);
+          if (err?.name === 'TokenExpiredError') {
+            return res
+              .status(401)
+              .json({ code: 40100, message: '토큰이 만료되었습니다.' });
+          }
+          return res.status(403).json({ message: '유효하지 않은 토큰입니다.' });
         }
 
         const jwtData = decoded as { uid: string; deviceId: string };
