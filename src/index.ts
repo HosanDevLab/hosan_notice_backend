@@ -35,8 +35,7 @@ app.use('/', routes);
 
 console.log(process.env.DB_USERNAME);
 
-const DB_URI = `mongodb://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@${process.env.DB_HOSTNAME}:${process.env.DB_PORT}/${process.env.DB_NAME}`;
-console.log(DB_URI);
+const DB_URI = `mongodb://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@${process.env.DB_HOSTNAME}:${process.env.DB_PORT}`;
 
 mongoose
   .connect(DB_URI, {
