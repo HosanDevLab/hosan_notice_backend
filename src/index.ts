@@ -35,11 +35,14 @@ app.use('/', routes);
 
 console.log(process.env.DB_USERNAME);
 
+const DB_URI = `mongodb://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@${process.env.DB_HOSTNAME}:${process.env.DB_PORT}/${process.env.DB_NAME}`;
+console.log(DB_URI);
+
 mongoose
-  .connect(
-    `mongodb://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@${process.env.DB_HOSTNAME}:${process.env.DB_PORT}/${process.env.DB_NAME}`,
-    { dbName: process.env.DB_NAME, authSource: process.env.DB_AUTH_SOURCE }
-  )
+  .connect(DB_URI, {
+    dbName: process.env.DB_NAME,
+    authSource: process.env.DB_AUTH_SOURCE,
+  })
   .then(() => console.log('DB connected successfully'))
   .catch(console.error);
 
