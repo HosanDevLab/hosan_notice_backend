@@ -39,7 +39,7 @@ router.get('/token', (req, res) => {
       }
 
       let token = jwt.sign({ uid: uid, deviceId }, process.env.SECRET_KEY!, {
-        expiresIn: '1m',
+        expiresIn: '1h',
       });
 
       let refreshToken = jwt.sign({}, process.env.SECRET_KEY!, {
@@ -150,13 +150,6 @@ router.get('/refresh', (req, res) => {
         }
       }
 
-      console.log(
-        isAccessTokenValid,
-        isAccessTokenExpired,
-        isRefreshTokenValid,
-        isRefreshTokenExpired
-      );
-
       if (!isAccessTokenValid && isAccessTokenExpired) {
         if (!isRefreshTokenValid && isRefreshTokenExpired) {
           return res.status(401).json({
@@ -171,7 +164,7 @@ router.get('/refresh', (req, res) => {
             { uid: uid, deviceId },
             process.env.SECRET_KEY!,
             {
-              expiresIn: '1m',
+              expiresIn: '1h',
             }
           );
 

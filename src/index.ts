@@ -37,8 +37,8 @@ console.log(process.env.DB_USERNAME);
 
 mongoose
   .connect(
-    `mongodb://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@${process.env.DB_HOSTNAME}:${process.env.DB_PORT}/admin`,
-    { dbName: process.env.DB_NAME }
+    `mongodb://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@${process.env.DB_HOSTNAME}:${process.env.DB_PORT}/${process.env.DB_NAME}`,
+    { dbName: process.env.DB_NAME, authSource: process.env.DB_AUTH_SOURCE }
   )
   .then(() => console.log('DB connected successfully'))
   .catch(console.error);

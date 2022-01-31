@@ -37,7 +37,6 @@ router.use((req, res, next) => {
 
       jwt.verify(authValue, process.env.SECRET_KEY!, async (err, decoded) => {
         if (err || !decoded) {
-          console.log(err?.name, authValue);
           if (err?.name === 'TokenExpiredError') {
             return res
               .status(401)
