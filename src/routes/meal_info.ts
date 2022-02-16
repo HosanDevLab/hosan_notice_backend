@@ -1,9 +1,13 @@
 import axios from 'axios';
 import { Router } from 'express';
+import nodeCache from '../modules/cache';
 
 const router = Router({ mergeParams: true });
 
 router.get('/', (req, res) => {
+  let cachedData = nodeCache.get('mealInfo');
+  if (cachedData) return res.json(cachedData);
+
   let now = new Date();
   now.setHours(now.getHours() + 9);
   axios
@@ -17,6 +21,7 @@ router.get('/', (req, res) => {
     )
     .then((r) => {
       res.send(r.data);
+      nodeCache.set('mealInfo', r.data, 60 * 60);
     });
 });
 

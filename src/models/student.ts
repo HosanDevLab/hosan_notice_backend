@@ -1,4 +1,4 @@
-import { model, Schema } from 'mongoose';
+import { model, ObjectId, Schema } from 'mongoose';
 
 interface Student {
   uid: string;
@@ -7,7 +7,9 @@ interface Student {
   numberInClass: number;
   name: string;
   subjects: string[];
+  classes: ObjectId[];
   loginDevice?: string;
+  loginDeviceName?: string;
   refreshToken?: string;
 }
 
@@ -37,7 +39,17 @@ export const StudentSchema = new Schema<Student>(
       type: [String],
       required: true,
     },
+    classes: [
+      {
+        type: Schema.Types.ObjectId,
+        required: true,
+        ref: 'Class',
+      },
+    ],
     loginDevice: {
+      type: String,
+    },
+    loginDeviceName: {
       type: String,
     },
     refreshToken: {
@@ -47,4 +59,4 @@ export const StudentSchema = new Schema<Student>(
   { collection: 'students' }
 );
 
-export const StudentModel = model('Student', StudentSchema, 'students');
+export const StudentModel = model('Student', StudentSchema);

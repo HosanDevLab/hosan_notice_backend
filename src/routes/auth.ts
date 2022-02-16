@@ -34,6 +34,7 @@ router.get('/token', (req, res) => {
         res.status(403).json({
           code: 40300,
           message: 'Already logged in from another device',
+          deviceName: student.loginDeviceName,
         });
         return;
       }
@@ -49,6 +50,7 @@ router.get('/token', (req, res) => {
       await student?.updateOne({
         $set: {
           loginDevice: deviceId,
+          loginDeviceName: req.header('Device-Name'),
           refreshToken,
         },
       });
@@ -113,6 +115,7 @@ router.get('/refresh', (req, res) => {
         res.status(403).json({
           code: 40300,
           message: 'Already logged in from another device',
+          deviceName: student.loginDeviceName,
         });
         return;
       }
@@ -205,6 +208,7 @@ router.post('/logout-other', (req, res) => {
         {
           $set: {
             loginDevice: null,
+            loginDeviceName: null,
           },
         }
       )

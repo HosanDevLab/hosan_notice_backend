@@ -12,6 +12,7 @@
     "googleapis": "^92.0.0",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.1.8",
+    "node-cache": "^5.1.2",
     "winston": "^3.5.0",
     "winston-daily-rotate-file": "^4.6.0"
   },

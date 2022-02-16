@@ -7,9 +7,12 @@ const router = Router({ mergeParams: true });
 router.get('/me', async (req, res) => {
   try {
     console.log(req.user.uid);
-    let student = await StudentModel.findOne({ uid: req.user.uid }).exec();
+    let student = await StudentModel.findOne(
+      { uid: req.user.uid },
+      { refreshToken: 0 }
+    ).exec();
 
-    res.send(student);
+    res.json(student);
     console.log(student);
   } catch (e) {
     logger.error(e);

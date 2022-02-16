@@ -6,6 +6,7 @@ import path from 'path';
 import admin from 'firebase-admin';
 import routes from './routes';
 import mongoose from 'mongoose';
+import fs from 'fs';
 
 const PORT = process.env.PORT || 3001;
 
@@ -22,6 +23,10 @@ admin.initializeApp({
     path.join(__dirname, process.env.SERVICE_ACCOUNT_FILE!)
   ),
 });
+
+fs.readdirSync('./src/models')
+  .filter((file) => file.endsWith('.ts') || file.endsWith('.js'))
+  .forEach((file) => require(`./models/${file.split('.')[0]}`));
 
 const app = express();
 
