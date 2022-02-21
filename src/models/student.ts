@@ -1,6 +1,6 @@
 import { model, ObjectId, Schema } from 'mongoose';
 
-interface Student {
+export interface Student {
   uid: string;
   grade: number;
   classNum: number;
@@ -35,10 +35,13 @@ export const StudentSchema = new Schema<Student>(
       type: String,
       required: true,
     },
-    subjects: {
-      type: [String],
-      required: true,
-    },
+    subjects: [
+      {
+        type: Schema.Types.ObjectId,
+        required: true,
+        ref: 'Subject',
+      },
+    ],
     classes: [
       {
         type: Schema.Types.ObjectId,

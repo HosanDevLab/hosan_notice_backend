@@ -1,11 +1,11 @@
 import { model, ObjectId, Schema } from 'mongoose';
 
-interface Assignment {
+export interface Assignment {
   title: string;
   description: string;
   type: 'assignment' | 'assessment';
   subject: ObjectId;
-  teacher: string;
+  teacher?: string;
   classes: ObjectId[];
   deadline: Date;
   createdAt: Date;
@@ -32,7 +32,6 @@ export const AssignmentSchema = new Schema<Assignment>(
     },
     teacher: {
       type: String,
-      required: true,
     },
     classes: [
       {

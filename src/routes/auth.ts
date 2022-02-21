@@ -156,6 +156,7 @@ router.get('/refresh', (req, res) => {
       if (!isAccessTokenValid && isAccessTokenExpired) {
         if (!isRefreshTokenValid && isRefreshTokenExpired) {
           return res.status(401).json({
+            code: 40100,
             message: 'Unauthorized: access token and refresh token expired',
           });
         } else if (!isRefreshTokenValid) {
