@@ -6,7 +6,10 @@ export interface Student {
   classNum: number;
   numberInClass: number;
   name: string;
-  subjects: string[];
+  subjects: {
+    '1st': ObjectId[];
+    '2nd': ObjectId[];
+  };
   classes: ObjectId[];
   loginDevice?: string;
   loginDeviceName?: string;
@@ -35,13 +38,22 @@ export const StudentSchema = new Schema<Student>(
       type: String,
       required: true,
     },
-    subjects: [
-      {
-        type: Schema.Types.ObjectId,
-        required: true,
-        ref: 'Subject',
-      },
-    ],
+    subjects: {
+      '1st': [
+        {
+          type: Schema.Types.ObjectId,
+          required: true,
+          ref: 'Subject',
+        },
+      ],
+      '2nd': [
+        {
+          type: Schema.Types.ObjectId,
+          required: true,
+          ref: 'Subject',
+        },
+      ],
+    },
     classes: [
       {
         type: Schema.Types.ObjectId,
