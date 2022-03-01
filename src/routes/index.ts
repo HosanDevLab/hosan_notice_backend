@@ -6,6 +6,8 @@ import students from './students';
 import assignments from './assignments';
 import subjects from './subjects';
 import teachers from './teachers';
+import classes from './classes';
+import timetables from './timetables';
 import auth from './auth';
 
 const router = Router({ mergeParams: true });
@@ -15,6 +17,8 @@ router.use('/students', firebaseAuth, students);
 router.use('/assignments', firebaseAuth, assignments);
 router.use('/subjects', firebaseAuth, subjects);
 router.use('/teachers', firebaseAuth, teachers);
+router.use('/classes', firebaseAuth, classes);
+router.use('/timetables', firebaseAuth, timetables);
 router.use('/auth', auth);
 router.use('/meal-info', firebaseAuth, mealInfo);
 
