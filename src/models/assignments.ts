@@ -2,13 +2,15 @@ import { model, ObjectId, Schema } from 'mongoose';
 
 export interface Assignment {
   title: string;
-  description: string;
+  description?: string;
+  author: ObjectId;
   type: 'assignment' | 'assessment';
   subject: ObjectId;
   teacher?: string;
-  classes: ObjectId[];
-  deadline: Date;
+  classroom: ObjectId;
+  deadline?: Date;
   createdAt: Date;
+  hearts: ObjectId[];
 }
 
 export const AssignmentSchema = new Schema<Assignment>(
@@ -19,7 +21,11 @@ export const AssignmentSchema = new Schema<Assignment>(
     },
     description: {
       type: String,
+    },
+    author: {
+      type: Schema.Types.ObjectId,
       required: true,
+      ref: 'Student',
     },
     type: {
       type: String,
@@ -33,21 +39,26 @@ export const AssignmentSchema = new Schema<Assignment>(
     teacher: {
       type: String,
     },
-    classes: [
-      {
-        type: Schema.Types.ObjectId,
-        required: true,
-        ref: 'Class',
-      },
-    ],
+    classroom: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      ref: 'Class',
+    },
+
     deadline: {
       type: Date,
-      required: true,
     },
     createdAt: {
       type: Date,
       required: true,
     },
+    hearts: [
+      {
+        type: Schema.Types.ObjectId,
+        required: true,
+        ref: 'Student',
+      },
+    ],
   },
   { collection: 'assignments' }
 );

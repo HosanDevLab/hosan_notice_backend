@@ -182,6 +182,7 @@ router.get('/refresh', (req, res) => {
         }
       } else {
         res.status(400).json({
+          code: 40000,
           message: 'Access token is not expired yet',
         });
       }

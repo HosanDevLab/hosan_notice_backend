@@ -7,6 +7,7 @@ import admin from 'firebase-admin';
 import routes from './routes';
 import mongoose from 'mongoose';
 import fs from 'fs';
+import agenda from './modules/agenda';
 
 const PORT = process.env.PORT || 3001;
 
@@ -42,13 +43,21 @@ console.log(process.env.DB_USERNAME);
 
 const DB_URI = `mongodb://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@${process.env.DB_HOSTNAME}:${process.env.DB_PORT}`;
 
-mongoose
-  .connect(DB_URI, {
-    dbName: process.env.DB_NAME,
-    authSource: process.env.DB_AUTH_SOURCE,
-  })
-  .then(() => console.log('DB connected successfully'))
-  .catch(console.error);
+(async () => {
+  await mongoose
+    .connect(DB_URI, {
+      dbName: process.env.DB_NAME,
+      authSource: process.env.DB_AUTH_SOURCE,
+    })
+    .then(() => console.log('DB connected successfully'))
+    .catch(console.error);
+
+  await agenda.start().then(() => {
+    console.log('agenda started');
+  });
+
+  agenda.every('5 seconds', 'p');
+})();
 
 app.listen(PORT, () => {
   console.log(
