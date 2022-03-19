@@ -5,6 +5,7 @@ import agenda from '../modules/agenda';
 import admin from 'firebase-admin';
 import { logger } from '../modules/winston';
 import { ClassModel } from '../models/class';
+import { AssignmentCommentsModel } from '../models/assignments_comments';
 
 const router = Router({ mergeParams: true });
 
@@ -123,6 +124,40 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+router.get('/:id/comments', async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    let student = await StudentModel.findOne({ uid: req.user.uid }).exec();
+
+    if (!student) {
+      return res.status(404).json({ error: 'Student not found' });
+    }
+
+    let classroom = await ClassModel.findOne({
+      grade: student.grade,
+      classNum: student.classNum,
+    }).exec();
+
+    if (!classroom) {
+      return res.status(404).json({ error: 'Classroom not found' });
+    }
+
+    let comments = await AssignmentCommentsModel.find({
+      assignment: id,
+    })
+      .populate('author')
+      .populate('hearts')
+      .exec();
+
+    console.log(comments);
+    res.send(comments);
+  } catch (e) {
+    logger.error(e);
+    console.error(e);
+  }
+});
+
 router.patch('/:id', async (req, res) => {
   const id = req.params.id;
 
@@ -144,6 +179,15 @@ router.patch('/:id', async (req, res) => {
       return res.status(404).json({ error: 'Classroom not found' });
     }
 
+    let assignment = await AssignmentModel.findOne({
+      classroom,
+      _id: id,
+    }).exec();
+
+    if (assignment?.author.toString() !== student.id) {
+      return res.status(403).json({ error: 'Not authorized' });
+    }
+
     let updates = {
       title: data.title,
       description: data.description,
@@ -162,11 +206,12 @@ router.patch('/:id', async (req, res) => {
       {
         classroom,
         _id: id,
+        author: student,
       },
       { $set: updates }
     );
 
-    let assignment = await AssignmentModel.findOne({
+    let new_assignment = await AssignmentModel.findOne({
       classroom,
       _id: id,
     })
@@ -176,7 +221,7 @@ router.patch('/:id', async (req, res) => {
       .populate('hearts')
       .exec();
 
-    res.send(assignment);
+    res.send(new_assignment);
   } catch (e) {
     logger.error(e);
     console.error(e);
@@ -200,6 +245,15 @@ router.delete('/:id', async (req, res) => {
 
     if (!classroom) {
       return res.status(404).json({ error: 'Classroom not found' });
+    }
+
+    let assignment = await AssignmentModel.findOne({
+      classroom,
+      _id: id,
+    }).exec();
+
+    if (assignment?.author.toString() !== student.id) {
+      return res.status(403).json({ error: 'Not authorized' });
     }
 
     await AssignmentModel.deleteOne({
