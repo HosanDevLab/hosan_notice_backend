@@ -74,12 +74,27 @@ router.post('/', async (req, res) => {
       hearts: [],
     });
 
-    admin.messaging().sendToTopic('assignmentPosted', {
-      notification: {
-        title: data.title,
-        body: `${student.name}님이 새 과제를 등록했어요.`,
+    let classStudents = await StudentModel.find(
+      {
+        grade: student.grade,
+        classNum: student.classNum,
       },
-    });
+      {
+        fcmToken: 1,
+      }
+    );
+
+    admin.messaging().sendToDevice(
+      classStudents
+        .filter((student) => !!student.fcmToken)
+        .map((student) => student.fcmToken!),
+      {
+        notification: {
+          title: data.title,
+          body: `${student.name}님이 새 과제를 등록했어요.`,
+        },
+      }
+    );
 
     res.send(assignment);
   } catch (e) {
@@ -146,12 +161,70 @@ router.get('/:id/comments', async (req, res) => {
     let comments = await AssignmentCommentsModel.find({
       assignment: id,
     })
+      .sort({ createdAt: 1 })
       .populate('author')
       .populate('hearts')
       .exec();
 
-    console.log(comments);
     res.send(comments);
+  } catch (e) {
+    logger.error(e);
+    console.error(e);
+  }
+});
+
+router.post('/:id/comments', async (req, res) => {
+  const id = req.params.id;
+  const { content, parent } = req.body;
+
+  if (!content) {
+    return res.status(400).json({ error: 'Content is required' });
+  }
+
+  try {
+    let student = await StudentModel.findOne({ uid: req.user.uid }).exec();
+
+    if (!student) {
+      return res.status(404).json({ error: 'Student not found' });
+    }
+
+    let classroom = await ClassModel.findOne({
+      grade: student.grade,
+      classNum: student.classNum,
+    }).exec();
+
+    if (!classroom) {
+      return res.status(404).json({ error: 'Classroom not found' });
+    }
+
+    let comments = await AssignmentCommentsModel.create({
+      assignment: id,
+      content,
+      author: student,
+      createdAt: new Date(),
+      hearts: [],
+      parent,
+    });
+
+    res.send(comments);
+
+    let assignment = await AssignmentModel.findOne({
+      classroom,
+      _id: id,
+    })
+      .populate('author')
+      .exec();
+
+    if (!assignment) return;
+
+    if ((assignment.author as any).uid !== student.uid) {
+      admin.messaging().sendToDevice([(assignment.author as any).fcmToken], {
+        notification: {
+          title: content,
+          body: `${student.name}님이 새 댓글을 등록했어요.`,
+        },
+      });
+    }
   } catch (e) {
     logger.error(e);
     console.error(e);
@@ -311,6 +384,19 @@ router.post('/:id/heart', async (req, res) => {
       .exec();
 
     res.send(assignment);
+
+    if (!assignment) return;
+
+    let author = assignment!.author as any;
+
+    if (author.id !== student.id) {
+      admin.messaging().sendToDevice([author.fcmToken], {
+        notification: {
+          title: '좋아요 추가됨',
+          body: `${author.name}님이 ${assignment.title} 과제에 좋아요를 눌렀습니다.`,
+        },
+      });
+    }
   } catch (e) {
     logger.error(e);
     console.error(e);

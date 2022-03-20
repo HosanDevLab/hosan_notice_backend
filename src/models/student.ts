@@ -14,6 +14,7 @@ export interface Student {
   loginDevice?: string;
   loginDeviceName?: string;
   refreshToken?: string;
+  fcmToken?: string;
 }
 
 export const StudentSchema = new Schema<Student>(
@@ -68,6 +69,9 @@ export const StudentSchema = new Schema<Student>(
       type: String,
     },
     refreshToken: {
+      type: String,
+    },
+    fcmToken: {
       type: String,
     },
   },

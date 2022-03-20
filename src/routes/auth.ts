@@ -8,6 +8,9 @@ const router = Router({ mergeParams: true });
 router.get('/token', (req, res) => {
   const idToken = req.header('ID-Token');
   const deviceId = req.header('Device-ID');
+  const deviceName = req.header('Device-Name');
+  const fcmToken = req.header('FCM-Token');
+
   if (!idToken) {
     return res
       .status(401)
@@ -47,11 +50,14 @@ router.get('/token', (req, res) => {
         expiresIn: '14d',
       });
 
+      console.log(fcmToken);
+
       await student?.updateOne({
         $set: {
           loginDevice: deviceId,
-          loginDeviceName: req.header('Device-Name'),
+          loginDeviceName: deviceName,
           refreshToken,
+          fcmToken,
         },
       });
 
