@@ -6,6 +6,8 @@ import admin from 'firebase-admin';
 import { logger } from '../modules/winston';
 import { ClassModel } from '../models/class';
 import { AssignmentCommentsModel } from '../models/assignments_comments';
+import { SubjectModel } from '../models/subjects';
+import { TeacherModel } from '../models/teachers';
 
 const router = Router({ mergeParams: true });
 
@@ -84,6 +86,9 @@ router.post('/', async (req, res) => {
       }
     );
 
+    let subject = await SubjectModel.findById(data.subject).exec();
+    let teacher = await TeacherModel.findById(data.teacher).exec();
+
     admin.messaging().sendToDevice(
       classStudents
         .filter((student) => !!student.fcmToken)
@@ -91,10 +96,20 @@ router.post('/', async (req, res) => {
       {
         notification: {
           title: data.title,
-          body: `${student.name}님이 새 과제를 등록했어요.`,
+          body: `${student.name}님이 ${subject!.name}${
+            teacher ? `(${teacher.name})` : ''
+          } 과목 새 과제를 등록했어요.`,
         },
       }
     );
+
+    if (data.deadline) {
+      let alertDt = new Date(data.deadline);
+      alertDt.setUTCDate(alertDt.getUTCDate() - 1);
+      agenda.schedule(alertDt, 'pushDeadlineNotification', {
+        assignmentId: assignment.id,
+      });
+    }
 
     res.send(assignment);
   } catch (e) {
@@ -231,6 +246,49 @@ router.post('/:id/comments', async (req, res) => {
   }
 });
 
+router.delete('/:id/comments/:commentid', async (req, res) => {
+  const id = req.params.id;
+  const commentId = req.params.commentid;
+
+  try {
+    let student = await StudentModel.findOne({ uid: req.user.uid }).exec();
+
+    if (!student) {
+      return res.status(404).json({ error: 'Student not found' });
+    }
+
+    let classroom = await ClassModel.findOne({
+      grade: student.grade,
+      classNum: student.classNum,
+    }).exec();
+
+    if (!classroom) {
+      return res.status(404).json({ error: 'Classroom not found' });
+    }
+
+    let assignment = await AssignmentModel.findOne({
+      classroom,
+      _id: id,
+    }).exec();
+
+    if (!assignment) {
+      return res.status(404).json({ error: 'Assignment not found' });
+    }
+
+    await AssignmentCommentsModel.deleteOne({
+      classroom,
+      author: student,
+      assignment,
+      _id: commentId,
+    }).exec();
+
+    res.send({ message: 'OK' });
+  } catch (e) {
+    logger.error(e);
+    console.error(e);
+  }
+});
+
 router.patch('/:id', async (req, res) => {
   const id = req.params.id;
 
@@ -294,6 +352,21 @@ router.patch('/:id', async (req, res) => {
       .populate('hearts')
       .exec();
 
+    await agenda.cancel({
+      name: `pushDeadlineNotification`,
+      data: {
+        assignmentId: id,
+      },
+    });
+
+    if (data.deadline) {
+      let alertDt = new Date(data.deadline);
+      alertDt.setUTCDate(alertDt.getUTCDate() - 1);
+      agenda.schedule(alertDt, 'pushDeadlineNotification', {
+        assignmentId: new_assignment!.id,
+      });
+    }
+
     res.send(new_assignment);
   } catch (e) {
     logger.error(e);
@@ -334,6 +407,13 @@ router.delete('/:id', async (req, res) => {
       author: student,
       _id: id,
     }).exec();
+
+    await agenda.cancel({
+      name: `pushDeadlineNotification`,
+      data: {
+        assignmentId: id,
+      },
+    });
 
     res.send({ message: 'OK' });
   } catch (e) {

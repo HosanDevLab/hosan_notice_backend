@@ -8,7 +8,6 @@ router.get('/all', async (req, res) => {
   try {
     let teachers = await TeacherModel.find().populate('classroom').exec();
 
-    console.log(teachers);
     res.send(teachers);
   } catch (e) {
     logger.error(e);

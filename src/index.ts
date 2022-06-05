@@ -55,8 +55,6 @@ const DB_URI = `mongodb://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@
   await agenda.start().then(() => {
     console.log('agenda started');
   });
-
-  agenda.every('5 seconds', 'p');
 })();
 
 app.listen(PORT, () => {

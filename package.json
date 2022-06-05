@@ -9,7 +9,7 @@
     "compression": "^1.7.4",
     "cors": "^2.8.5",
     "cross-env": "^7.0.3",
-    "firebase-admin": "^10.0.2",
+    "firebase-admin": "^10.2.0",
     "googleapis": "^92.0.0",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.1.8",
