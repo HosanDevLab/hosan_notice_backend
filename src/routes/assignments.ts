@@ -265,6 +265,49 @@ router.post('/:id/comments', async (req, res) => {
   }
 });
 
+router.patch('/:id/comments/:commentid', async (req, res) => {
+  const id = req.params.id;
+  const commentId = req.params.commentid;
+  const { content, parent } = req.body;
+
+  if (!content) {
+    return res.status(400).json({ error: 'Content is required' });
+  }
+
+  try {
+    let student = await StudentModel.findOne({ uid: req.user.uid }).exec();
+
+    if (!student) {
+      return res.status(404).json({ error: 'Student not found' });
+    }
+
+    let classroom = await ClassModel.findOne({
+      grade: student.grade,
+      classNum: student.classNum,
+    }).exec();
+
+    if (!classroom) {
+      return res.status(404).json({ error: 'Classroom not found' });
+    }
+
+    let comments = await AssignmentCommentsModel.updateOne(
+      {
+        assignment: id,
+        _id: commentId,
+      },
+      {
+        content,
+        parent,
+      }
+    );
+
+    res.send(comments);
+  } catch (e) {
+    logger.error(e);
+    console.error(e);
+  }
+});
+
 router.delete('/:id/comments/:commentid', async (req, res) => {
   const id = req.params.id;
   const commentId = req.params.commentid;
