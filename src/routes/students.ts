@@ -47,7 +47,47 @@ router.post('/', async (req, res) => {
         new: true,
         setDefaultsOnInsert: true,
       }
-    );
+    )
+      .populate('subjects.1st')
+      .populate('subjects.2nd')
+      .populate('classes')
+      .exec();
+
+    res.json(student);
+  } catch (e) {
+    logger.error(e);
+    console.error(e);
+  }
+});
+
+router.patch('/me', async (req, res) => {
+  const { grade, classNum, numberInClass, name, subjects, classes } =
+    req.body as Partial<Student>;
+
+  console.log(subjects);
+
+  try {
+    let student = await StudentModel.findOneAndUpdate(
+      { uid: req.user.uid },
+      {
+        uid: req.user.uid,
+        grade,
+        classNum,
+        numberInClass,
+        name,
+        subjects,
+        classes,
+      },
+      {
+        upsert: true,
+        new: true,
+        setDefaultsOnInsert: true,
+      }
+    )
+      .populate('subjects.1st')
+      .populate('subjects.2nd')
+      .populate('classes')
+      .exec();
 
     res.json(student);
   } catch (e) {

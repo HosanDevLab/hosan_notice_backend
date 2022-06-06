@@ -62,11 +62,25 @@ agenda.define('pushDeadlineNotification', async (job: any) => {
     {
       fcmToken: 1,
     }
-  );
+  )
+    .populate('subjects')
+    .exec();
+
+  const remoteConfig = await admin.remoteConfig().getTemplate();
+  const semester = (
+    remoteConfig.parameters[
+      process.env.NODE_ENV === 'production'
+        ? 'CURRENT_SEMESTER'
+        : 'DEV_CURRENT_SEMESTER'
+    ].defaultValue as any
+  ).value as '1st' | '2nd';
 
   admin.messaging().sendToDevice(
     classStudents
-      .filter((student) => !!student.fcmToken)
+      .filter(
+        (student) =>
+          !!student.fcmToken && student.subjects[semester].includes(subject!.id)
+      )
       .map((student) => student.fcmToken!),
     {
       notification: {

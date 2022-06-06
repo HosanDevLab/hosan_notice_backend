@@ -8,6 +8,8 @@ import routes from './routes';
 import mongoose from 'mongoose';
 import fs from 'fs';
 import agenda from './modules/agenda';
+import swaggerUi from 'swagger-ui-express';
+import swaggerJsDoc from 'swagger-jsdoc';
 
 const PORT = process.env.PORT || 3001;
 
@@ -37,7 +39,25 @@ app.use(compression());
 app.use(cors());
 app.set('trust proxy', 1);
 
+app.get('/', (req, res) => {
+  res.send({ message: 'Hello' });
+});
+
 app.use('/', routes);
+
+const options = {
+  definition: {
+    info: {
+      title: 'hosan notice',
+      version: '1.0.0',
+      description: 'hosan notice API DOCs',
+    },
+  },
+  apis: ['./routes/*.ts', './routes/*.js'],
+};
+
+const specs = swaggerJsDoc(options);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
 console.log(process.env.DB_USERNAME);
 

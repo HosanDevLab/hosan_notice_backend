@@ -48,7 +48,9 @@ router.post('/', async (req, res) => {
   try {
     let data = req.body as Assignment;
 
-    let student = await StudentModel.findOne({ uid: req.user.uid }).exec();
+    let student = await StudentModel.findOne({ uid: req.user.uid })
+      .populate('subjects')
+      .exec();
 
     if (!student) {
       return res.status(404).json({ error: 'Student not found' });
@@ -84,14 +86,31 @@ router.post('/', async (req, res) => {
       {
         fcmToken: 1,
       }
-    );
+    )
+      .populate('subjects')
+      .exec();
 
     let subject = await SubjectModel.findById(data.subject).exec();
     let teacher = await TeacherModel.findById(data.teacher).exec();
 
+    const remoteConfig = await admin.remoteConfig().getTemplate();
+    const semester = (
+      remoteConfig.parameters[
+        process.env.NODE_ENV === 'production'
+          ? 'CURRENT_SEMESTER'
+          : 'DEV_CURRENT_SEMESTER'
+      ].defaultValue as any
+    ).value as '1st' | '2nd';
+
+    console.log(student.subjects[semester]);
+
     admin.messaging().sendToDevice(
       classStudents
-        .filter((student) => !!student.fcmToken)
+        .filter(
+          (student) =>
+            !!student.fcmToken &&
+            student.subjects[semester].includes(data.subject)
+        )
         .map((student) => student.fcmToken!),
       {
         notification: {
