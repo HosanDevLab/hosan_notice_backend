@@ -27,8 +27,10 @@ router.get('/token', (req, res) => {
 
       if (
         !email ||
-        !email.endsWith('@hosan.hs.kr') ||
-        !['hosannotice@gmail.com'].includes(email)
+        !(
+          email.endsWith('@hosan.hs.kr') ||
+          ['hosannotice@gmail.com'].includes(email)
+        )
       ) {
         return res
           .status(403)
