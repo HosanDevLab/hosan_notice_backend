@@ -25,7 +25,11 @@ router.get('/token', (req, res) => {
 
       req.user = { uid, email: email! };
 
-      if (!email || !email.endsWith('@hosan.hs.kr')) {
+      if (
+        !email ||
+        !email.endsWith('@hosan.hs.kr') ||
+        !['hosannotice@gmail.com'].includes(email)
+      ) {
         return res
           .status(403)
           .json({ message: 'Only hosan.hs.kr email can be used for login' });
